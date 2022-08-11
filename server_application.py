@@ -2,10 +2,8 @@ import pickle
 import pygame
 import network
 import QuadTree
-import random
 import flocking
 import Tentacle
-import time
 
 
 class App:
@@ -63,27 +61,25 @@ class App:
         self.segments: list[Tentacle.Segment(pygame.sprite.Sprite)] = self.tentacle.sprites()
         print("transmitting_objects", self.transmitting_objects)
 
-    def update(self):
-        """Calculating position and rotation of objects"""
+    def update_events_and_positions(self):
+        self.update_events()
+        self.update_positions()
+        # print(self.clock.get_fps())
+        self.delta_time = self.clock.tick(60)
+
+    def update_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.is_running = False
                 pygame.quit()
                 return
 
-        # Updating position, rotation and scale of the tentacle (following the mouse position via IK)
-        self.segments[-1].follow(self.cursor_pos.x, self.cursor_pos.y, 1)
-        self.segments[-1].update(len(self.tentacle))
+    def update_positions(self):
+        self.update_tentacle_position()
+        self.update_quadtree()
+        self.update_boids_positions()
 
-        for i in range(len(self.tentacle)-2, -1, -1):
-            self.segments[i].follow(self.segments[i + 1].a.x, self.segments[i + 1].a.y, 0)
-            self.segments[i].update(len(self.tentacle) - (i+1))
-
-        self.segments[0].set_a(self.tentacle_root, len(self.tentacle))
-        for i in range(1, len(self.segments)):
-            self.segments[i].set_a(self.segments[i - 1].b, len(self.tentacle) - (i+1))
-
-        # Updating QuadTree
+    def update_quadtree(self):
         self.quadtree.reset(self.flock.boids)
         for boid in self.flock.boids:
             self.quadtree.insert(boid)
@@ -102,8 +98,7 @@ class App:
             self.dragged_boid = None
             self.was_pressed = False
 
-        # Updating Boids
-        # print(self.delta_time)
+    def update_boids_positions(self):
         for boid in self.flock.boids:
             found_boids_50 = []
             self.circle.set(boid.position, 100)
@@ -114,15 +109,24 @@ class App:
             # self.quadtree.query(self.circle, found_boids_100)
             self.flock.update(boid, found_boids_50, found_boids_100, self.delta_time)
 
-        # Updating box position
+    def update_tentacle_position(self):
+        self.segments[-1].follow(self.cursor_pos.x, self.cursor_pos.y, 1)
+        self.segments[-1].update(len(self.tentacle))
+
+        for i in range(len(self.tentacle)-2, -1, -1):
+            self.segments[i].follow(self.segments[i + 1].a.x, self.segments[i + 1].a.y, 0)
+            self.segments[i].update(len(self.tentacle) - (i+1))
+
+        self.segments[0].set_a(self.tentacle_root, len(self.tentacle))
+        for i in range(1, len(self.segments)):
+            self.segments[i].set_a(self.segments[i - 1].b, len(self.tentacle) - (i+1))
+
+    def update_box_position(self):
         self.transmitting_objects["box_1"].pos_angle_update(self.cursor_pos, 0)
 
-        # print(self.clock.get_fps())
-        self.delta_time = self.clock.tick(60)
-
-    def get_sending_bytes(self, time_: int):
+    def get_sending_bytes(self, time_in_millis: int):
         # print("Here1", [value.data for key, value in self.transmitting_objects.items()])
         # print(len(pickle.dumps([time] + [object_.data for object_ in self.transmitting_objects.values()])))
         # return pickle.dumps([round(time.time() * 1000)] +
         #                     [object_.data for object_ in self.transmitting_objects.values()])
-        return pickle.dumps([time_] + [object_.data for object_ in self.transmitting_objects.values()])
+        return pickle.dumps([time_in_millis] + [object_.data for object_ in self.transmitting_objects.values()])

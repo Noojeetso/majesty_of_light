@@ -1,4 +1,3 @@
-from pygame import Vector2
 import pygame
 import socket
 import pickle
@@ -75,4 +74,3 @@ class Network:
             return pickle.loads(resp)
         except socket.error as e:
             print(e)
-
