@@ -36,8 +36,7 @@ class Translation:
 
 
 class CurrentState:
-    translation = Translation()
-    time_millis = 0
+    time_seconds = 0
     delta_time = 0
     cursor_pos = pygame.Vector2()
 
@@ -72,7 +71,7 @@ class App:
         self.bkg = pygame.image.load("bkg.jpg")
         self.transmitting_objects: dict[str: network.TransmitObject] = dict()
         self.sea: Sea = Sea(self.seed, self.screen_properties.monitor_height)
-        self.quadtree: QuadTree = QuadTree.QuadTree(self.screen_properties.display.get_rect(), 4)
+        self.quadtree: QuadTree.QuadTree = QuadTree.QuadTree(self.screen_properties.display.get_rect(), 4)
         self.debug_rect: QuadTree.Rectangle = \
             QuadTree.Rectangle(0, 0, self.screen_properties.width // 4, self.screen_properties.height // 4)
         self.box_1 = network.TransmitObject("box_1", "box.png", pygame.Vector2(250, 150), 0)
@@ -97,8 +96,8 @@ class App:
 
     def update_transition_from_data(self, received_list: list[any]):
         """Update data received from the server"""
-        self.state.time_millis = int(received_list[0])
-        # print("TIME", self.time_millis)
+        self.state.time_seconds = int(received_list[0])
+        # print("TIME", self.state.time_seconds)
         for object_ in received_list[1:]:
             if object_["name"] == "tentacle":
                 length = len(self.tentacle_list)
@@ -165,10 +164,10 @@ class App:
                  self.screen_properties.get_window_y()
 
         step = 10
-        y_1 = self.sea.perlin_gen.get_value(move_x / 500 + self.state.time_millis * 0.0005) * 100 + move_y
+        y_1 = self.sea.perlin_gen.get_value(move_x / 500 + self.state.time_seconds * 0.0005) * 100 + move_y
         for x in range(0, self.screen_properties.width + step, step):
             y_2 = self.sea.perlin_gen.get_value((move_x + x) / 500 +
-                                                self.state.time_millis * 0.0005) * 100 + move_y
+                                                self.state.time_seconds * 0.0005) * 100 + move_y
             # pygame.draw.line(self.screen_properties.display, (255, 255, 255), pygame.Vector2(x - step, y_1),
             #                  pygame.Vector2(x, y_2), width=2)
             y_1 = y_2
@@ -189,7 +188,8 @@ class App:
     def draw_tentacle(self):
         for i in range(1, len(self.segments)):
             # self.segments[i].set_a(self.segments[i - 1].b, len(self.tentacle) - (i+1))
-            # pygame.draw.line(self.screen_properties.display, (255, 255, 255), self.segments[i].a, self.segments[i].b, width=2)
+            # pygame.draw.line(self.screen_properties.display,
+            #                  (255, 255, 255), self.segments[i].a, self.segments[i].b, width=2)
             self.segments[i].rect = self.segments[i].rect.move(self.translation.x, self.translation.y)
             self.screen_properties.display.blit(self.segments[i].image, self.segments[i].rect)
 
@@ -203,7 +203,7 @@ class App:
 
     def get_sending_bytes(self):
         """Stringify global cursor pos and it's status"""
-        # print(str(self.cursor_pos) + ' ' + str(int(pygame.mouse.get_focused())))
+        # print(str(self.state.cursor_pos) + ' ' + str(int(pygame.mouse.get_focused())))
         cursor = self.state.cursor_pos + \
                  pygame.Vector2(self.screen_properties.get_window_x(), self.screen_properties.get_window_y())
         return (str(cursor) + ' ' + str(int(pygame.mouse.get_focused())) + ' ' +

@@ -124,9 +124,9 @@ class App:
     def update_box_position(self):
         self.transmitting_objects["box_1"].pos_angle_update(self.cursor_pos, 0)
 
-    def get_sending_bytes(self, time_in_millis: int):
+    def get_sending_bytes(self, time_in_seconds: int):
         # print("Here1", [value.data for key, value in self.transmitting_objects.items()])
         # print(len(pickle.dumps([time] + [object_.data for object_ in self.transmitting_objects.values()])))
         # return pickle.dumps([round(time.time() * 1000)] +
         #                     [object_.data for object_ in self.transmitting_objects.values()])
-        return pickle.dumps([time_in_millis] + [object_.data for object_ in self.transmitting_objects.values()])
+        return pickle.dumps([time_in_seconds] + [object_.data for object_ in self.transmitting_objects.values()])

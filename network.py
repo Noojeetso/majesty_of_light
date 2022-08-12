@@ -54,9 +54,6 @@ class Network:
         self.seed = int(self.pos[6:])
         print("Seed:", self.seed)
 
-    def getP(self):
-        return self.pos
-
     def connect(self):
         while not self.connected:
             try:
