@@ -74,15 +74,15 @@ class QuadTree:
         self.points = list()
         self.is_divided = False
 
-    def reset(self, points):
+    def reset(self, new_points):
         self.northwest: 'QuadTree' = None
         self.northeast: 'QuadTree' = None
         self.southwest: 'QuadTree' = None
         self.southeast: 'QuadTree' = None
         self.points = list()
         self.is_divided = False
-        for point in points:
-            self.insert(point)
+        for new_point in new_points:
+            self.insert(new_point)
 
     def subdivide(self):
         x = self.boundary.x
@@ -133,7 +133,7 @@ class QuadTree:
             # print(boid_texture.rect)
             boid_texture.rect.center = boid.position.x + move_x, boid.position.y + move_y
             boid_texture.image = pygame.transform.rotozoom(
-                boid_texture.orig_image,  - math.atan2(boid.velocity.y, boid.velocity.x) * 180 / 3.14, 2)
+                boid_texture.orig_image,  -math.atan2(boid.velocity.y, boid.velocity.x) * 180 / 3.14, 2)
             boid_texture.rect = boid_texture.image.get_rect(center=boid_texture.rect.center)
             # pygame.draw.circle(self.screen, (0, 255, 0), pygame.Vector2(boid.position.x + move_x,
             #                                                             boid.position.y + move_y), 3)
