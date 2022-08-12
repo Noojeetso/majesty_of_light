@@ -1,4 +1,3 @@
-from pygame import Vector2
 import pygame
 import socket
 import pickle
