@@ -87,4 +87,4 @@ if __name__ == "__main__":
 
     app.is_running = True
     while app.is_running:
-        app.update_positions()
+        app.update_events_and_positions()

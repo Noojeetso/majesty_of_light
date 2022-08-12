@@ -64,6 +64,7 @@ class App:
     def update_events_and_positions(self):
         self.update_events()
         self.update_positions()
+        # self.update_box_position()
         # print(self.clock.get_fps())
         self.delta_time = self.clock.tick(60)
 
@@ -79,10 +80,22 @@ class App:
         self.update_quadtree()
         self.update_boids_positions()
 
+    def update_tentacle_position(self):
+        self.segments[-1].follow(self.cursor_pos.x, self.cursor_pos.y, 1)
+        self.segments[-1].update(len(self.tentacle))
+
+        for i in range(len(self.tentacle)-2, -1, -1):
+            self.segments[i].follow(self.segments[i + 1].a.x, self.segments[i + 1].a.y, 0)
+            self.segments[i].update(len(self.tentacle) - (i+1))
+
+        self.segments[0].set_a(self.tentacle_root, len(self.tentacle))
+        for i in range(1, len(self.segments)):
+            self.segments[i].set_a(self.segments[i - 1].b, len(self.tentacle) - (i+1))
+
     def update_quadtree(self):
         self.quadtree.reset(self.flock.boids)
-        for boid in self.flock.boids:
-            self.quadtree.insert(boid)
+        # for boid in self.flock.boids:
+        #     self.quadtree.insert(boid)
 
         if self.is_pressed:
             if not self.was_pressed:
@@ -108,18 +121,6 @@ class App:
             # self.circle.set(boid.position, 0)
             # self.quadtree.query(self.circle, found_boids_100)
             self.flock.update(boid, found_boids_50, found_boids_100, self.delta_time)
-
-    def update_tentacle_position(self):
-        self.segments[-1].follow(self.cursor_pos.x, self.cursor_pos.y, 1)
-        self.segments[-1].update(len(self.tentacle))
-
-        for i in range(len(self.tentacle)-2, -1, -1):
-            self.segments[i].follow(self.segments[i + 1].a.x, self.segments[i + 1].a.y, 0)
-            self.segments[i].update(len(self.tentacle) - (i+1))
-
-        self.segments[0].set_a(self.tentacle_root, len(self.tentacle))
-        for i in range(1, len(self.segments)):
-            self.segments[i].set_a(self.segments[i - 1].b, len(self.tentacle) - (i+1))
 
     def update_box_position(self):
         self.transmitting_objects["box_1"].pos_angle_update(self.cursor_pos, 0)

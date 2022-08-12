@@ -48,10 +48,10 @@ class Sea:
         self.level = monitor_height
 
 
-class CurrentState:
-    time_seconds = 0
-    delta_time = 0
-    cursor_pos = pygame.Vector2()
+# class CurrentState:
+#     time_seconds = 0
+#     delta_time = 0
+#     cursor_pos = pygame.Vector2()
 
 
 class App:
@@ -59,14 +59,14 @@ class App:
         pygame.init()
         pygame.display.set_caption("Client")
         self.seed = seed
-        # self.time_seconds = 0
-        # self.delta_time = 0
-        # self.cursor_pos = pygame.Vector2()
+        self.time_seconds = 0
+        self.delta_time = 0
+        self.cursor_pos = pygame.Vector2()
 
         self.screen_properties = ScreenProperties(700, 500)
 
         self.is_running = False
-        self.state = CurrentState()
+        # self.state = CurrentState()
         self.translation = Translation()
         self.clock = pygame.time.Clock()
 
@@ -98,8 +98,8 @@ class App:
 
     def update_transition_from_data(self, received_list: list[any]):
         """Update data received from the server"""
-        self.state.time_seconds = int(received_list[0])
-        # print("TIME", self.state.time_seconds)
+        self.time_seconds = int(received_list[0])
+        # print("TIME", self.time_seconds)
         for object_ in received_list[1:]:
             if object_["name"] == "tentacle":
                 length = len(self.tentacle_list)
@@ -130,7 +130,7 @@ class App:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 print(self.screen_properties.window_.position)
             if event.type == pygame.MOUSEMOTION:
-                self.state.cursor_pos = pygame.mouse.get_pos()
+                self.cursor_pos = pygame.mouse.get_pos()
             if event.type == pygame.QUIT:
                 self.is_running = False
                 pygame.quit()
@@ -140,8 +140,8 @@ class App:
         self.calculate_translation()
         self.draw_frame()
         # print(self.clock.get_fps())
-        self.state.delta_time = self.clock.tick(60)
-        self.sea.perlin_time += self.state.delta_time
+        self.delta_time = self.clock.tick(60)
+        self.sea.perlin_time += self.delta_time
 
     def calculate_translation(self):
         translation_x = -self.screen_properties.get_window_x()
@@ -169,10 +169,10 @@ class App:
                  self.screen_properties.get_window_y()
 
         step = 10
-        y_1 = self.sea.perlin_gen.get_value(move_x / 500 + self.state.time_seconds * 0.0005) * 100 + move_y
+        y_1 = self.sea.perlin_gen.get_value(move_x / 500 + self.time_seconds * 0.0005) * 100 + move_y
         for x in range(0, self.screen_properties.width + step, step):
             y_2 = self.sea.perlin_gen.get_value((move_x + x) / 500 +
-                                                self.state.time_seconds * 0.0005) * 100 + move_y
+                                                self.time_seconds * 0.0005) * 100 + move_y
             # pygame.draw.line(self.screen_properties.display, (255, 255, 255), pygame.Vector2(x - step, y_1),
             #                  pygame.Vector2(x, y_2), width=2)
             y_1 = y_2
@@ -204,8 +204,8 @@ class App:
 
     def get_sending_bytes(self):
         """Stringify global cursor pos and it's status"""
-        # print(str(self.state.cursor_pos) + ' ' + str(int(pygame.mouse.get_focused())))
-        cursor = self.state.cursor_pos + \
+        # print(str(self.cursor_pos) + ' ' + str(int(pygame.mouse.get_focused())))
+        cursor = self.cursor_pos + \
                  pygame.Vector2(self.screen_properties.get_window_x(), self.screen_properties.get_window_y())
         return (str(cursor) + ' ' + str(int(pygame.mouse.get_focused())) + ' ' +
                 str(int(pygame.mouse.get_pressed()[0]))).encode("utf-8")
