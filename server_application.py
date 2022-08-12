@@ -19,9 +19,7 @@ class App:
         self.clock = pygame.time.Clock()
         self.delta_time = 0
         self.cursor_pos = pygame.Vector2(self.width / 2, self.height / 2)
-        self.was_pressed = False
         self.is_pressed = False
-        self.in_focus = False
 
         # Initializing QuadTree
         self.boundary = QuadTree.Rectangle(0, 0, self.width, self.height)
@@ -64,6 +62,7 @@ class App:
 
     def update_events_and_positions(self):
         self.update_events()
+        print("Mouse coords:", self.cursor_pos, self.is_pressed)
         self.update_positions()
         # self.update_box_position()
         # print(self.clock.get_fps())
@@ -95,23 +94,20 @@ class App:
 
     def update_quadtree(self):
         self.quadtree.reset(self.flock.boids)
-        if self.in_focus:
-            self.update_mouse_drag()
+        self.update_mouse_drag()
 
     def update_mouse_drag(self):
         if self.is_pressed:
-            if not self.was_pressed:
+            if self.dragged_boid is None:
                 found_boids = []
                 self.circle.set(self.segments[-1].a, 10)
                 self.quadtree.query(self.circle, found_boids)
                 if found_boids:
                     self.dragged_boid = found_boids[0]
-                self.was_pressed = True
-            elif self.dragged_boid is not None:
+            else:
                 self.dragged_boid.position = self.segments[-1].a
         else:
             self.dragged_boid = None
-            self.was_pressed = False
 
     def update_boids_positions(self):
         for boid in self.flock.boids:
@@ -128,8 +124,4 @@ class App:
         self.transmitting_objects["box_1"].pos_angle_update(self.cursor_pos, 0)
 
     def get_sending_bytes(self, time_in_millis: int):
-        # print("Here1", [value.data for key, value in self.transmitting_objects.items()])
-        # print(len(pickle.dumps([time] + [object_.data for object_ in self.transmitting_objects.values()])))
-        # return pickle.dumps([round(time.time() * 1000)] +
-        #                     [object_.data for object_ in self.transmitting_objects.values()])
         return pickle.dumps([time_in_millis] + [object_.data for object_ in self.transmitting_objects.values()])

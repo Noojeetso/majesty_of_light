@@ -65,8 +65,9 @@ class App:
         self.state = CurrentState()
         self.screen_properties = ScreenProperties(700, 500)
 
+        # pygame.mouse.set_visible(False)
+
         self.is_running = False
-        # self.state = CurrentState()
         self.translation = Translation()
         self.clock = pygame.time.Clock()
 
@@ -203,10 +204,20 @@ class App:
         self.screen_properties.screen.blit(self.box_1.image.convert(),
                                             self.box_1.rect.move(self.translation.x, self.translation.y))
 
-    def get_sending_bytes(self):
+    def get_encoded_send_data(self):
         """Stringify global cursor pos and it's status"""
-        # print(str(self.cursor_pos) + ' ' + str(int(pygame.mouse.get_focused())))
-        cursor = self.state.cursor_pos + \
-                 pygame.Vector2(self.screen_properties.get_window_x(), self.screen_properties.get_window_y())
-        return (str(cursor) + ' ' + str(int(pygame.mouse.get_focused())) + ' ' +
-                str(int(pygame.mouse.get_pressed()[0]))).encode("utf-8")
+        # print(str(self.state.cursor_pos) + ' ' + str(int(pygame.mouse.get_focused())) + ' ' +
+        #       str(pygame.mouse.get_pressed()[0]))
+        global_pos = self.get_global_cursor_pos(self.state.cursor_pos)
+        decoded_data = str(global_pos) + ' ' + str(int(pygame.mouse.get_focused())) + ' ' + \
+                       str(int(pygame.mouse.get_pressed()[0]))
+        encoded_data = self.encode_send_data(decoded_data)
+        return encoded_data
+
+    def get_global_cursor_pos(self, relative_pos: pygame.Vector2):
+        return relative_pos + \
+               pygame.Vector2(self.screen_properties.get_window_x(), self.screen_properties.get_window_y())
+
+    @staticmethod
+    def encode_send_data(decoded_data: str):
+        return decoded_data.encode("utf-8")

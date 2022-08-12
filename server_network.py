@@ -78,36 +78,33 @@ class PacketParser:
 
 
 def threaded_client(conn):
+    def set_parsed_data():
+        app.is_pressed = parser.is_pressed()
+        app.cursor_pos.xy = parser.get_cursor_pos()
+
     conn.send(str.encode("Seed: " + str(seed)))
     connected_clients.add(conn)
     parser = PacketParser()
     current_time_seconds: int
+    is_connected = True
 
-    while True:
+    while is_connected:
         try:
             data_bytes = conn.recv(1024)
             parser.parse_data(data_bytes)
 
-            app.is_pressed = parser.is_pressed()
-            app.in_focus = parser.in_focus()
-            if app.in_focus:
-                # app.cursor_pos.xy = int(parser.parsed_data.cursor_pos[0]), int(parser.parsed_data.cursor_pos[1])
-                app.cursor_pos.xy = parser.get_cursor_pos()
+            if parser.in_focus():
+                set_parsed_data()
 
             current_time_seconds = round(time.time() * 1000)
             data = app.get_sending_bytes(current_time_seconds)
-            # print("Sending pickled:", data)
-            # server_data =
-            # if server_data.keys() != data.keys():
-            #     updated_clients.clear()
             conn.sendall(pickle.dumps(data))
         except:
-            break
-
-    print("Lost connection")
-    storage.idCount -= 1
-    connected_clients.remove(conn)
-    conn.close()
+            is_connected = False
+            print("Lost connection")
+            storage.idCount -= 1
+            connected_clients.remove(conn)
+            conn.close()
 
 
 def accept_connections():
