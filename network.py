@@ -9,7 +9,7 @@ class TransmitObject(pygame.sprite.Sprite):
         super().__init__()
         self.data.update({"name": name})
 
-        print("tupe?", name, args)
+        # print("tupe?", name, args)
         if name == "tentacle":
             self.data.update({"segments": [[seg.rect, seg.angle] for seg in args[0]]})
         elif name == "flock":

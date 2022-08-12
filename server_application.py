@@ -21,6 +21,7 @@ class App:
         self.cursor_pos = pygame.Vector2(self.width / 2, self.height / 2)
         self.was_pressed = False
         self.is_pressed = False
+        self.in_focus = False
 
         # Initializing QuadTree
         self.boundary = QuadTree.Rectangle(0, 0, self.width, self.height)
@@ -94,9 +95,10 @@ class App:
 
     def update_quadtree(self):
         self.quadtree.reset(self.flock.boids)
-        # for boid in self.flock.boids:
-        #     self.quadtree.insert(boid)
+        if self.in_focus:
+            self.update_mouse_drag()
 
+    def update_mouse_drag(self):
         if self.is_pressed:
             if not self.was_pressed:
                 found_boids = []
