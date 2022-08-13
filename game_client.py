@@ -14,9 +14,9 @@ if __name__ == "__main__":
     # print("Loaded unpickled: ", 123)
     while app.is_running:
         app.is_running = app.update_events_and_screen()
-        encoded_send_data = app.get_encoded_send_data()
+        encoded_send = app.get_encoded_send_data()
         # print("Sending: ", encoded_send_data)
-        encoded_response_data = client_network.send(encoded_send_data)
-        decoded_response_data = decode_response_data(encoded_response_data)
-        app.update_transition_from_data(decoded_response_data)
+        encoded_response = client_network.send(encoded_send)
+        decoded_response = decode_response_data(encoded_response)
+        app.update_transition_from_data(decoded_response)
         # print("Loaded unpickled: ", resp)

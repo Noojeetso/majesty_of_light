@@ -37,32 +37,21 @@ class App:
         self.dragged_boid: flocking.Boid = None
 
         # Initializing tentacle
-        self.tentacle_root = pygame.Vector2(self.width//2, self.height + 100)
-        self.tentacle = pygame.sprite.Group()
-        self.tentacle_list = []
-        seg = Tentacle.Segment(250, 250, 0, 20)
-        self.tentacle.add(seg)
-        self.tentacle_list.append(seg)
-
-        for i in range(1, 30):
-            seg = Tentacle.Segment(self.tentacle.sprites()[i - 1], 0, (30 - i)**1.12)
-            self.tentacle.add(seg)
-            self.tentacle_list.append(seg)
+        self.tentacle_1 = Tentacle.Tentacle(100, 30, pygame.Vector2(self.width//2, self.height + 100))
 
         # Initializing box
         box_1 = network.TransmitObject("box_1", "box.png", pygame.Vector2(250, 150), 0)
         self.transmitting_objects.update({"box_1": box_1})
 
-        print("tentacle_list", self.tentacle_list)
-        segs = network.TransmitObject("tentacle", self.tentacle_list)
+        # print("tentacle_list", self.tentacle_segments)
+        segs = network.TransmitObject("tentacle", self.tentacle_1.get_segments())
         self.transmitting_objects.update({"tentacle": segs})
 
-        self.segments: list[Tentacle.Segment(pygame.sprite.Sprite)] = self.tentacle.sprites()
+        self.segments: list[Tentacle.Segment(pygame.sprite.Sprite)] = self.tentacle_1.tentacle.sprites()
         print("transmitting_objects", self.transmitting_objects)
 
     def update_events_and_positions(self):
         self.update_events()
-        print("Mouse coords:", self.cursor_pos, self.is_pressed)
         self.update_positions()
         # self.update_box_position()
         # print(self.clock.get_fps())
@@ -82,15 +71,15 @@ class App:
 
     def update_tentacle_position(self):
         self.segments[-1].follow(self.cursor_pos.x, self.cursor_pos.y, 1)
-        self.segments[-1].update(len(self.tentacle))
+        self.segments[-1].update(self.tentacle_1.get_length())
 
-        for i in range(len(self.tentacle)-2, -1, -1):
+        for i in range(self.tentacle_1.get_length() - 2, -1, -1):
             self.segments[i].follow(self.segments[i + 1].a.x, self.segments[i + 1].a.y, 0)
-            self.segments[i].update(len(self.tentacle) - (i+1))
+            self.segments[i].update(self.tentacle_1.get_length() - (i+1))
 
-        self.segments[0].set_a(self.tentacle_root, len(self.tentacle))
+        self.segments[0].set_a(self.tentacle_1.root_position, self.tentacle_1.get_length())
         for i in range(1, len(self.segments)):
-            self.segments[i].set_a(self.segments[i - 1].b, len(self.tentacle) - (i+1))
+            self.segments[i].set_a(self.segments[i - 1].b, self.tentacle_1.get_length() - (i+1))
 
     def update_quadtree(self):
         self.quadtree.reset(self.flock.boids)

@@ -87,7 +87,7 @@ class App:
         self.transmitting_objects["box_1"] = self.box_1
 
         for i in range(1, 30):
-            seg = Tentacle.Segment(self.tentacle_list[i - 1], 0, (30 - i)**1.12)
+            seg = Tentacle.Segment(0, (30 - i)**1.12, parent_segment=self.tentacle_list[i - 1])
             self.tentacle.add(seg)
             self.tentacle_list.append(seg)
 

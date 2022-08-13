@@ -8,22 +8,50 @@ class Vector1:
         self.value = x
 
 
+class Tentacle:
+    def __init__(self, length: int, segments_count: int, root_position: pygame.Vector2):
+        self.tentacle = pygame.sprite.Group()
+        self.tentacle_segments = []
+        self.root_position = root_position
+        self.segments_count = segments_count
+
+        seg = Segment(self.root_position.x, self.root_position.y, 0, 20)
+        self.tentacle.add(seg)
+        self.tentacle_segments.append(seg)
+
+        for i in range(1, segments_count):
+            seg = Segment(0, (segments_count - i)**1.12, parent_segment=self.tentacle.sprites()[i - 1])
+            self.tentacle.add(seg)
+            self.tentacle_segments.append(seg)
+
+    def get_length(self) -> int:
+        return self.segments_count
+
+    def get_root_position(self) -> pygame.Vector2:
+        return self.root_position
+
+    def get_segments(self) -> list['Segment']:
+        return self.tentacle_segments
+
+
 class Segment(pygame.sprite.Sprite):
     len_ = 0
 
-    def __init__(self, arg, *args):
+    # TODO: remove arg lists
+    def __init__(self, arg, *args, parent_segment: 'Segment(pygame.sprite.Sprite)' = None):
         super().__init__()
         self.angle = Vector1(0)
         self.parent: 'Segment'
-        if isinstance(arg, Segment):
-            self.parent = arg
-            self.a = arg.b.copy()
-            self.angle.value = args[0]
-            self.len_ = args[1]
+        if parent_segment is not None:
+            self.parent = parent_segment
+            self.a = self.parent.b.copy()
+            self.angle.value = arg
+            self.len_ = args[0]
         else:
             self.a = Vector2(arg, args[0])
             self.angle.value = args[1]
             self.len_ = args[2]
+        self.b = pygame.Vector2()
         self.calculate_b()
         self.orig_image = pygame.image.load("seg.png")
         self.image = pygame.image.load("seg.png")
